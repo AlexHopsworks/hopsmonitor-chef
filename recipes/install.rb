@@ -1,3 +1,4 @@
+setup_aws()
 my_private_ip = my_private_ip()
 
 group node['hopsmonitor']['group'] do
