@@ -118,11 +118,13 @@ if node.influxdb.systemd == "true"
     owner "root"
     group "root"
     mode 0754
+if node.services.enabled == "true"
     notifies :enable, resources(:service => service_name)
-    notifies :start, resources(:service => service_name), :immediately
+end
+    notifies :restart, resources(:service => service_name)
   end
 
-  kagent_config "reload_influxdb_daemon" do
+  kagent_config "#{service_name}" do
     action :systemd_reload
   end  
 
@@ -150,6 +152,12 @@ end
 # Setup influxdb for use with Hopsworks
 #
 
+ruby_block 'wait_until_influx_started' do
+  block do
+     sleep(15)
+  end
+  action :run
+end
 
 
 
@@ -206,7 +214,7 @@ end
 
 if node.kagent.enabled == "true" 
    kagent_config "influxdb" do
-     service "influxdb"
+     service "Monitoring"
      log_file "/var/log/influxdb.log"
    end
 end

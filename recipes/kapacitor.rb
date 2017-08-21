@@ -160,10 +160,10 @@ if node.kapacitor.systemd == "true"
     group "root"
     mode 0754
     notifies :enable, resources(:service => service_name)
-    notifies :start, resources(:service => service_name), :immediately
+    notifies :restart, resources(:service => service_name)
   end
 
-  kagent_config "reload_kapacitor_daemon" do
+  kagent_config "#{service_name}" do
     action :systemd_reload
   end  
 
@@ -188,7 +188,7 @@ end
 
 if node.kagent.enabled == "true" 
    kagent_config "kapacitor" do
-     service "kapacitor"
+     service "Monitoring"
      log_file "#{node.kapacitor.base_dir}/log/kapacitor.log"
    end
 end

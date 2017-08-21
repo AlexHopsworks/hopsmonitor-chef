@@ -153,11 +153,13 @@ if node.grafana.systemd == "true"
     owner "root"
     group "root"
     mode 0754
+if node.services.enabled == "true"
     notifies :enable, resources(:service => service_name)
-    notifies :start, resources(:service => service_name), :immediately
+end
+    notifies :restart, resources(:service => service_name)
   end
 
-  kagent_config "reload_grafana_daemon" do
+  kagent_config "#{service_name}" do
     action :systemd_reload
   end  
 
@@ -183,8 +185,8 @@ end
 
 if node.kagent.enabled == "true" 
    kagent_config service_name do
-     service service_name
-     log_file "#{node.grafana.base_dir}/grafana.log"
+     service "Monitoring"
+     log_file "#{node.grafana.base_dir}/logs/grafana.log"
    end
 end
 
@@ -196,115 +198,10 @@ bash 'add_grafan_index_for_influxdb' do
         user "root"
         code <<-EOH
             set -e
-curl --user #{node.grafana.admin_user}:#{node.grafana.admin_password} 'http://localhost:3000/api/datasources' -H "Content-Type: application/json" -X POST -d '{"Name":"influxdb","Type":"influxdb","url":"http://localhost:#{node.influxdb.http.port}","Access":"proxy","isDefault":true,"database":"graphite","user":"#{node.influxdb.db_user}","password":"#{node.influxdb.db_password}"}'
+curl --user #{node.grafana.admin_user}:#{node.grafana.admin_password} 'http://localhost:3000/api/datasources' -H "Content-Type:application/json" -X POST -d '{"Name":"influxdb","Type":"influxdb","url":"http://localhost:#{node.influxdb.http.port}","Access":"proxy","isDefault":true,"database":"graphite","user":"#{node.influxdb.db_user}","password":"#{node.influxdb.db_password}"}'
         EOH
   retries 10
   retry_delay 4
 #     not_if { }
 end
 
-
-
-# indexes_installed = "#{node.grafana.base_dir}/.indexes_installed"
-
-#  http_request 'elastic-install-indexes' do
-#    url "http://localhost:#{node.influxdb.http.port}/projects"
-#    message '
-#    {  
-#     "mappings":{  
-#         "proj":{  
-#             "dynamic":"strict",
-#             "properties":{  
-#                 "description":{  
-#                     "type":"string"
-#                 },
-#                 "name":{  
-#                     "type":"string"
-#                 },
-#                 "parent_id":{  
-#                     "type":"long"
-#                 },
-#                 "user":{  
-#                     "type":"string"
-#                 }
-#             }
-#         },
-#         "ds":{  
-#             "dynamic":"strict",
-#             "_parent":{  
-#                 "type":"proj"
-#             },
-#             "_routing":{  
-#                 "required":true
-#             },
-#             "properties":{  
-#                 "description":{  
-#                     "type":"string"
-#                 },
-#                 "name":{  
-#                     "type":"string"
-#                 },
-#                 "parent_id":{  
-#                     "type":"long"
-#                 },
-#                 "project_id":{  
-#                     "type":"long"
-#                 },
-#                 "public_ds":{  
-#                     "type":"boolean"
-#                 },
-#                 "xattr":{  
-#                     "type":"nested",
-#                     "dynamic":true
-#                 }
-#             }
-#         },
-#         "inode":{  
-#             "dynamic":"strict",
-#             "_parent":{  
-#                 "type":"ds"
-#             },
-#             "_routing":{  
-#                 "required":true
-#             },
-#             "properties":{  
-#                 "dataset_id":{  
-#                     "type":"long"
-#                 },
-#                 "group":{  
-#                     "type":"string"
-#                 },
-#                 "name":{  
-#                     "type":"string"
-#                 },
-#                 "operation":{  
-#                     "type":"long"
-#                 },
-#                 "parent_id":{  
-#                     "type":"long"
-#                 },
-#                 "project_id":{  
-#                     "type":"long"
-#                 },
-#                 "size":{  
-#                     "type":"long"
-#                 },
-#                 "timestamp":{  
-#                     "type":"long"
-#                 },
-#                 "user":{  
-#                     "type":"string"
-#                 },
-#                 "xattr":{  
-#                     "type":"nested",
-#                     "dynamic":true
-#                 }
-#             }
-#         }
-#       }
-#    }'
-#    action :put
-#    retries numRetries
-#    retry_delay retryDelay
-#    not_if { ::File.exists?( indexes_installed ) }       
-#  end
