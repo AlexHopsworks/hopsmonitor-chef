@@ -14,19 +14,12 @@ end
 depends 'conda'
 depends 'java'
 depends 'kagent'
-#depends 'chef-grafana'
 depends 'elastic'
 depends 'influxdb'
 depends 'ndb'
 depends 'kzookeeper'
 depends 'hops'
 depends 'hadoop_spark'
-
-#depends 'runit'
-#depends 'grafana'
-#depends 'apt'
-#depends 'yum'
-#depends 'nginx'
 
 recipe "hopsmonitor::install", "Installs Influxdb/Grafana Server"
 recipe "hopsmonitor::default", "configures Influxdb/Grafana Server"
@@ -210,3 +203,8 @@ attribute "smtp/email_password",
           :description => "Password for email account. ",
           :required => "required",
           :type => 'string'
+
+
+attribute "elastic/default/private_ips",
+          :description => "Set ip addresses",
+          :type => "array"
